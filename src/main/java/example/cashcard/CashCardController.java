@@ -16,6 +16,7 @@ import java.net.URI;
 import java.security.Principal;
 import java.util.Optional;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 
@@ -31,7 +32,7 @@ public class CashCardController {
     
     @GetMapping("/{requestedId}")
     private ResponseEntity<CashCard> findById(@PathVariable Long requestedId, Principal principal) {
-        Optional<CashCard> cashCardOptional = cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
+        Optional<CashCard> cashCardOptional = findCashCard(requestedId, principal);
         if (cashCardOptional.isPresent()) {
             return ResponseEntity.ok(cashCardOptional.get());
         } else {
@@ -65,5 +66,25 @@ public class CashCardController {
                     pageable.getSortOr(Sort.by(Sort.Direction.ASC, "amount"))
         ));
         return ResponseEntity.ok(page.getContent());
+    }
+
+
+    @PutMapping("/{requestedId}")
+    private ResponseEntity<Void> putCashCard(@PathVariable Long requestedId, 
+            @RequestBody CashCard cashCardUpdate, Principal principal) {
+        
+        Optional<CashCard> cashCardOptional = findCashCard(requestedId, principal);
+
+        if(cashCardOptional.isPresent()) {
+            CashCard updatedCashCard = new CashCard(cashCardOptional.get().id(), cashCardUpdate.amount(), principal.getName());
+            cashCardRepository.save(updatedCashCard);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    private Optional<CashCard> findCashCard(Long requestedId, Principal principal) {
+        return cashCardRepository.findByIdAndOwner(requestedId, principal.getName());
     }
 }
