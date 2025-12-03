@@ -13,3 +13,7 @@ For more verbose console output:
 
 **Show test reports**
 `open build/reports/tests/test/index.html`
+
+**Refresh dependencies and run tests**
+`./gradlew --refresh-dependencies test --info --console=plain'
+
